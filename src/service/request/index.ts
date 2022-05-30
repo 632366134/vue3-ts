@@ -41,9 +41,7 @@ class HYRequest {
     )
     this.instance.interceptors.response.use(
       (res) => {
-        setTimeout(() => {
-          this.loading?.close()
-        }, 1000)
+        this.loading?.close()
         console.log('所有实例的响应拦截成功')
         const data = res.data
         if (data.returnCode === '-1001') {
