@@ -1,6 +1,6 @@
 <template>
   <div class="login-phone">
-    <el-form label-width="70px" :rules="rules2" :model="phone">
+    <el-form label-width="70px" :rules="rules2" :model="phone" ref="formRef">
       <el-form-item label="手机号" prop="num">
         <el-input v-model="phone.num" />
       </el-form-item>
@@ -15,16 +15,38 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from 'vue'
+import { defineComponent, reactive, Ref, ref } from 'vue'
 import { rules2 } from './config/phone.config'
+import { ElForm } from 'element-plus'
+import localCache from '@/untils/cache'
+import { useStore } from 'vuex'
 export default defineComponent({
   setup() {
+    const store = useStore()
     const phone = reactive({
       num: '',
       code: ''
     })
+    const formRef = ref<InstanceType<typeof ElForm>>()
 
-    return { phone, rules2 }
+    const loginPhone = (isKeepPassword: Ref<boolean>) => {
+      formRef.value?.validate((valid) => {
+        if (valid) {
+          console.log('account开始登录')
+          if (isKeepPassword) {
+            localCache.setCache('name', phone.num)
+            localCache.setCache('password', phone.code)
+          } else {
+            localCache.deleteCache('name')
+            localCache.deleteCache('password')
+          }
+          store.dispatch('login/PhoneLoginAction', { ...phone })
+        } else {
+          console.log('object')
+        }
+      })
+    }
+    return { phone, rules2, formRef, loginPhone }
   }
 })
 </script>
